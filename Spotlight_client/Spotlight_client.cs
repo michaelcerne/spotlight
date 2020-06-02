@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.IO;
 
 using CitizenFX.Core;
 using API = CitizenFX.Core.Native.API;
+using Config = Spotlight_client.Config;
 
 namespace Spotlight_client
 {
     public class Spotlight_client : BaseScript
     {
-        readonly string DECOR_NAME_STATUS = "SpotlightStatus";
-        readonly string DECOR_NAME_XY = "SpotlightDirXY";
-        readonly string DECOR_NAME_Z = "SpotlightDirZ";
-        readonly string DECOR_NAME_BRIGHTNESS = "SpotlightDirLevel";
+        public const string DECOR_NAME_STATUS = "SpotlightStatus";
+        public const string DECOR_NAME_XY = "SpotlightDirXY";
+        public const string DECOR_NAME_Z = "SpotlightDirZ";
+        public const string DECOR_NAME_BRIGHTNESS = "SpotlightDirLevel";
 
         public Spotlight_client()
         {
@@ -101,7 +101,7 @@ namespace Spotlight_client
         {
             var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), false);
 
-            if (API.GetVehicleClass(vehicle) == 18)
+            if (API.GetVehicleClass(vehicle) == 18 || !Config.GetValueBool(Config.EMERGENCY_ONLY, true))
             {
                 if (IsSpotlightEnabled(vehicle))
                 {
@@ -110,7 +110,7 @@ namespace Spotlight_client
                 } else
                 {
                     API.DecorSetBool(vehicle, DECOR_NAME_STATUS, true);
-                    await TranslateDecorSmoothly(vehicle, DECOR_NAME_BRIGHTNESS, 0f, 30f, 30);
+                    await TranslateDecorSmoothly(vehicle, DECOR_NAME_BRIGHTNESS, 0f, Config.GetValueFloat(Config.BRIGHTNESS_LEVEL, 30f), 30);
                 }
             }
             await Task.FromResult(0);
@@ -118,7 +118,7 @@ namespace Spotlight_client
 
         private async Task MoveSpotlightVertical(bool up)
         {
-            var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), true);
+            var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), Config.GetValueBool(Config.REMOTE_CONTROL, true));
             var current = API.DecorGetFloat(vehicle, DECOR_NAME_Z);
 
             if (up)
@@ -132,16 +132,16 @@ namespace Spotlight_client
 
         private async Task MoveSpotlightHorizontal(bool left)
         {
-            var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), true);
+            var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), Config.GetValueBool(Config.REMOTE_CONTROL, true));
             var current = API.DecorGetFloat(vehicle, DECOR_NAME_XY);
-
+            Debug.WriteLine(Config.GetValueFloat(Config.RANGE_LEFT, 90f).ToString());
             if (left)
             {
-                if (current <= 90f) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current + 10f, 10);
+                if (current <= Config.GetValueFloat(Config.RANGE_LEFT, 90f)) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current + 10f, 10);
             }
             else
             {
-                if (current >= -30f) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current - 10f, 10);
+                if (current >= -Config.GetValueFloat(Config.RANGE_RIGHT, 30f)) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current - 10f, 10);
             }
         }
 
