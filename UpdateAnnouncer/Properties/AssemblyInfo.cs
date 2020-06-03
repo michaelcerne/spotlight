@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Spotlight_client")]
+[assembly: AssemblyTitle("Spotlight")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Spotlight_client")]
+[assembly: AssemblyProduct("Spotlight")]
 [assembly: AssemblyCopyright("Michael Cerne")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("e017e27e-9dac-4b69-9137-3f6680784a78")]
+[assembly: Guid("dc138ad5-8e20-4f8a-b7f2-2c444e6f4d4a")]
 
 // Version information for an assembly consists of the following four values:
 //

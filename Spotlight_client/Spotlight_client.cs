@@ -24,10 +24,7 @@ namespace Spotlight_client
 
         private void OnClientResourceStart(string resourceName)
         {
-            if (API.GetCurrentResourceName() != resourceName)
-            {
-                return;
-            }
+            if (API.GetCurrentResourceName() != resourceName) return;
 
             API.DecorRegister(DECOR_NAME_STATUS, 3);
             API.DecorRegister(DECOR_NAME_XY, 3);

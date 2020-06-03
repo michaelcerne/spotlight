@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30104.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spotlight_client", "Spotlight_client\Spotlight_client.csproj", "{E017E27E-9DAC-4B69-9137-3F6680784A78}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spotlight", "UpdateAnnouncer\Spotlight.csproj", "{DC138AD5-8E20-4F8A-B7F2-2C444E6F4D4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{E017E27E-9DAC-4B69-9137-3F6680784A78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E017E27E-9DAC-4B69-9137-3F6680784A78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E017E27E-9DAC-4B69-9137-3F6680784A78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC138AD5-8E20-4F8A-B7F2-2C444E6F4D4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC138AD5-8E20-4F8A-B7F2-2C444E6F4D4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC138AD5-8E20-4F8A-B7F2-2C444E6F4D4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC138AD5-8E20-4F8A-B7F2-2C444E6F4D4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
