@@ -14,6 +14,10 @@ namespace Spotlight_client
         public const string DECOR_NAME_XY = "SpotlightDirXY";
         public const string DECOR_NAME_Z = "SpotlightDirZ";
         public const string DECOR_NAME_BRIGHTNESS = "SpotlightDirLevel";
+        public static readonly string[] TRACKER_BONES = {
+            "weapon_1barrel",
+            "turret_1base"
+        };
 
         public Spotlight_client()
         {
@@ -71,23 +75,22 @@ namespace Spotlight_client
                 var handle = vehicle.Handle;
                 if (IsSpotlightEnabled(handle))
                 {
-                    var door = API.GetEntityBoneIndexByName(handle, "door_dside_f");
-                    var coords = API.GetWorldPositionOfEntityBone(handle, door);
-                    var doorCoords = API.GetWorldPositionOfEntityBone(handle, door);
-                    var carHeadingVector = (Vector2) API.GetEntityForwardVector(handle);
-                    var carHeadingVectorAngle = AngleConverter(Convert.ToDouble(carHeadingVector.X), Convert.ToDouble(carHeadingVector.Y));
+                    string baseBone = GetBaseBone(handle);
+                    Vector3 baseCoords = GetBaseCoordinates(handle, baseBone);
+                    Vector3 directionalCoords = GetDirectionalCoordinates(handle, baseBone);
 
                     SetSpotlightDefaultsIfNull(handle);
 
-                    var finalVector = new Vector3(
-                        new Vector2(
-                            Convert.ToSingle(Math.Cos((carHeadingVectorAngle + API.DecorGetFloat(handle, DECOR_NAME_XY)) / 57.2957795131)),
-                            Convert.ToSingle(Math.Sin((carHeadingVectorAngle + API.DecorGetFloat(handle, DECOR_NAME_XY)) / 57.2957795131))
-                        ),
-                        API.DecorGetFloat(handle, DECOR_NAME_Z)
+                    API.DrawSpotLight(
+                        baseCoords.X, baseCoords.Y, baseCoords.Z,
+                        directionalCoords.X, directionalCoords.Y, directionalCoords.Z,
+                        221, 221, 221,
+                        VehicleHasRotatableTargetBone(handle) ? 200f : 70f, // rotatable spotlights have longer max reach
+                        API.DecorGetFloat(handle, DECOR_NAME_BRIGHTNESS),
+                        4.3f,
+                        15.0f,
+                        28.6f
                     );
-
-                    API.DrawSpotLight(coords.X, doorCoords.Y, coords.Z + 0.35f, finalVector.X, finalVector.Y, finalVector.Z, 221, 221, 221, 70.0f, API.DecorGetFloat(handle, DECOR_NAME_BRIGHTNESS), 4.3f, 15.0f, 28.6f);
                 }
 
             }
@@ -97,8 +100,9 @@ namespace Spotlight_client
         private async Task ToggleSpotlight()
         {
             var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), false);
+            var vehicleClass = API.GetVehicleClass(vehicle);
 
-            if (API.GetVehicleClass(vehicle) == 18 || !Config.GetValueBool(Config.EMERGENCY_ONLY, true))
+            if (!Config.GetValueBool(Config.EMERGENCY_ONLY, true) || (vehicleClass == 18 || VehicleHasRotatableTargetBone(vehicle)))
             {
                 if (IsSpotlightEnabled(vehicle))
                 {
@@ -120,7 +124,7 @@ namespace Spotlight_client
 
             if (up)
             {
-                if (current <= 0.1f) await TranslateDecorSmoothly(vehicle, DECOR_NAME_Z, current, current + 0.1f, 10);
+                if (current <= 0.3f) await TranslateDecorSmoothly(vehicle, DECOR_NAME_Z, current, current + 0.1f, 10);
             } else
             {
                 if (current >= -1.2f) await TranslateDecorSmoothly(vehicle, DECOR_NAME_Z, current, current - 0.1f, 10);
@@ -131,7 +135,7 @@ namespace Spotlight_client
         {
             var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), Config.GetValueBool(Config.REMOTE_CONTROL, true));
             var current = API.DecorGetFloat(vehicle, DECOR_NAME_XY);
-            Debug.WriteLine(Config.GetValueFloat(Config.RANGE_LEFT, 90f).ToString());
+
             if (left)
             {
                 if (current <= Config.GetValueFloat(Config.RANGE_LEFT, 90f)) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current + 10f, 10);
@@ -162,6 +166,53 @@ namespace Spotlight_client
             {
                 API.DecorSetFloat(handle, DECOR_NAME_BRIGHTNESS, 0f);
             }
+        }
+
+        private static string GetBaseBone(int handle)
+        {
+            foreach (string bone in TRACKER_BONES)
+            {
+                var boneIndex = API.GetEntityBoneIndexByName(handle, bone);
+                if (boneIndex != -1)
+                {
+                    return bone;
+                }
+            }
+            return "door_dside_f";
+        }
+
+        private static Vector3 GetBaseCoordinates(int handle, string bone)
+        {
+            return API.GetWorldPositionOfEntityBone(handle, API.GetEntityBoneIndexByName(handle, bone));
+        }
+
+        private static Vector3 GetDirectionalCoordinates(int handle, string bone)
+        {
+            if (bone == "door_dside_f") // target bone is not rotatable, use default orientation
+            {
+                Vector2 vehicleHeading = (Vector2)API.GetEntityForwardVector(handle);
+                double vehicleHeadingAngle = AngleConverter(Convert.ToDouble(vehicleHeading.X), Convert.ToDouble(vehicleHeading.Y));
+
+                return new Vector3(
+                    new Vector2(
+                        Convert.ToSingle(Math.Cos((vehicleHeadingAngle + API.DecorGetFloat(handle, DECOR_NAME_XY)) / 57.2957795131)),
+                        Convert.ToSingle(Math.Sin((vehicleHeadingAngle + API.DecorGetFloat(handle, DECOR_NAME_XY)) / 57.2957795131))
+                    ),
+                    API.DecorGetFloat(handle, DECOR_NAME_Z)
+                );
+            }
+            else // target bone is rotatable, convert to direction
+            {
+                Vector3 boneHeading = API.GetWorldRotationOfEntityBone(handle, API.GetEntityBoneIndexByName(handle, bone));
+
+                return RotationToDirection(boneHeading);
+            }
+        }
+
+        private static bool VehicleHasRotatableTargetBone(int handle)
+        {
+            if (GetBaseBone(handle) != "door_dside_f") return true;
+            return false;
         }
 
         private static double AngleConverter(double x, double y) // credit to Aidan Ferry
@@ -202,6 +253,21 @@ namespace Spotlight_client
                 API.DecorSetFloat(handle, decorName, from + (to - from) * i/10);
                 await Delay(timeMs);
             }
+        }
+
+        public static Vector3 RotationToDirection(Vector3 Rotation) // credit to LETSPLAYORDY
+        {
+            float z = Rotation.Z;
+            float num = z * 0.0174532924f;
+            float x = Rotation.X;
+            float num2 = x * 0.0174532924f;
+            float num3 = Math.Abs((float)Math.Cos((double)num2));
+            return new Vector3
+            {
+                X = (float)((double)((float)(-(float)Math.Sin((double)num))) * (double)num3),
+                Y = (float)((double)((float)Math.Cos((double)num)) * (double)num3),
+                Z = (float)Math.Sin((double)num2)
+            };
         }
     }
 
