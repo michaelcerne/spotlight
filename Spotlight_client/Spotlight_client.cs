@@ -114,6 +114,7 @@ namespace Spotlight_client
                     await TranslateDecorSmoothly(vehicle, DECOR_NAME_BRIGHTNESS, 0f, Config.GetValueFloat(Config.BRIGHTNESS_LEVEL, 30f), 30);
                 }
             }
+
             await Task.FromResult(0);
         }
 
@@ -135,14 +136,17 @@ namespace Spotlight_client
         {
             var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), Config.GetValueBool(Config.REMOTE_CONTROL, true));
             var current = API.DecorGetFloat(vehicle, DECOR_NAME_XY);
+            bool isHeli = API.GetVehicleClass(vehicle) == 15;
+
+            Debug.WriteLine(current.ToString());
 
             if (left)
             {
-                if (current <= Config.GetValueFloat(Config.RANGE_LEFT, 90f)) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current + 10f, 10);
+                if (isHeli || current <= Config.GetValueFloat(Config.RANGE_LEFT, 90f)) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current + 10f, 10);
             }
             else
             {
-                if (current >= -Config.GetValueFloat(Config.RANGE_RIGHT, 30f)) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current - 10f, 10);
+                if (isHeli || current >= -Config.GetValueFloat(Config.RANGE_RIGHT, 30f)) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current - 10f, 10);
             }
         }
 
@@ -190,8 +194,8 @@ namespace Spotlight_client
         {
             if (bone == "door_dside_f") // target bone is not rotatable, use default orientation
             {
-                Vector2 vehicleHeading = (Vector2)API.GetEntityForwardVector(handle);
-                double vehicleHeadingAngle = Utilities.AngleConverter(Convert.ToDouble(vehicleHeading.X), Convert.ToDouble(vehicleHeading.Y));
+                Vector2 vehicleHeading = (Vector2) API.GetEntityForwardVector(handle);
+                double vehicleHeadingAngle = Utilities.DirectionToAngle(Convert.ToDouble(vehicleHeading.X), Convert.ToDouble(vehicleHeading.Y));
 
                 return new Vector3(
                     new Vector2(
@@ -204,6 +208,19 @@ namespace Spotlight_client
             else // target bone is rotatable, convert to direction
             {
                 Vector3 boneHeading = API.GetWorldRotationOfEntityBone(handle, API.GetEntityBoneIndexByName(handle, bone));
+
+                if (API.GetVehicleClass(handle) == 15) // helicopters retain manual offset
+                {
+                    double angle = Utilities.DirectionToAngle((Vector2) Utilities.RotationToDirection(boneHeading));
+
+                    return new Vector3(
+                        new Vector2(
+                            Convert.ToSingle(Math.Cos((angle + API.DecorGetFloat(handle, DECOR_NAME_XY)) / 57.2957795131)),
+                            Convert.ToSingle(Math.Sin((angle + API.DecorGetFloat(handle, DECOR_NAME_XY)) / 57.2957795131))
+                        ),
+                        API.DecorGetFloat(handle, DECOR_NAME_Z)
+                    );
+                }
 
                 return Utilities.RotationToDirection(boneHeading);
             }
