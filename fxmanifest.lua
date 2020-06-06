@@ -5,7 +5,7 @@ games { 'gta5' }
 
 author 'Michael Cerne' -- (FiveTwelve)
 description 'Spotlight is a Fivem/FivePD modification that allows players to utilize fully controllable spotlights on their vehicles.'
-version '1.1.0'
+version '1.2.0'
 
 client_scripts {
     'Spotlight_client.net.dll'
