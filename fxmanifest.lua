@@ -21,6 +21,10 @@ server_scripts {
 --
 
 emergency_only 'true' -- Only allow spotlight usage in emergency vehicles ('true'/'false')
+turret_support 'true' -- Allow spotlight usage in turreted vehicles, overrides emergency_only in these vehicles ('true'/'false')
+helicopter_support 'true' -- Allow spotlight usage in helicopters, overrides emergency_only in these vehicles ('true'/'false')
+helicopter_polmav_only 'false' -- Only allow helicopter spotlight usage in polmav, requires helicopter_support to be 'true' ('true'/'false')
+
 remote_control 'true' -- Allow players to aim the spotlight in the last vehicle they entered ('true'/'false')
 brightness_level '30' -- Brightness of the spotlight once it's "warmed up" ('{positive number}')
 aim_range_left '90' -- How far left from center the spotlight can be aimed in degrees ('{positive number}')
