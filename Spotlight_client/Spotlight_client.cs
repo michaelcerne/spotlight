@@ -102,7 +102,7 @@ namespace Spotlight_client
             var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), false);
             var vehicleClass = API.GetVehicleClass(vehicle);
 
-            if (!Config.GetValueBool(Config.EMERGENCY_ONLY, true) || (vehicleClass == 18 || VehicleHasRotatableTargetBone(vehicle)))
+            if (IsSpotlightUsageAllowed(vehicle))
             {
                 if (IsSpotlightEnabled(vehicle))
                 {
@@ -138,8 +138,6 @@ namespace Spotlight_client
             var current = API.DecorGetFloat(vehicle, DECOR_NAME_XY);
             bool isHeli = API.GetVehicleClass(vehicle) == 15;
 
-            Debug.WriteLine(current.ToString());
-
             if (left)
             {
                 if (isHeli || current <= Config.GetValueFloat(Config.RANGE_LEFT, 90f)) await TranslateDecorSmoothly(vehicle, DECOR_NAME_XY, current, current + 10f, 10);
@@ -156,7 +154,29 @@ namespace Spotlight_client
             return API.DecorGetBool(vehicle, DECOR_NAME_STATUS);
         }
 
-        private void SetSpotlightDefaultsIfNull(int handle)
+        private static bool IsSpotlightUsageAllowed(int handle)
+        {
+            int vehicleClass = API.GetVehicleClass(handle);
+            bool isHelicopter = vehicleClass == 15;
+            bool isEmergency = vehicleClass == 18;
+
+            if (isHelicopter)
+            {
+                if (Config.GetValueBool(Config.HELICOPTER_SUPPORT, true))
+                {
+                    if (!API.IsVehicleModel(handle, (uint)API.GetHashKey("polmav")) && Config.GetValueBool(Config.HELICOPTER_POLMAV_ONLY, false)) return false;
+                }
+                else return false;
+            }
+
+            if (VehicleHasRotatableTargetBone(handle) && Config.GetValueBool(Config.TURRET_SUPPORT, true)) return true;
+
+            if (isEmergency || !Config.GetValueBool(Config.EMERGENCY_ONLY, true)) return true;
+
+            return false;
+        }
+
+        private static void SetSpotlightDefaultsIfNull(int handle)
         {
             if (!API.DecorExistOn(handle, DECOR_NAME_XY))
             {

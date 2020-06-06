@@ -13,6 +13,9 @@ namespace Spotlight_client
     {
         // Config keys
         public const string EMERGENCY_ONLY = "emergency_only";
+        public const string TURRET_SUPPORT = "turret_support";
+        public const string HELICOPTER_SUPPORT = "helicopter_support";
+        public const string HELICOPTER_POLMAV_ONLY = "helicopter_polmav_only";
         public const string REMOTE_CONTROL = "remote_control";
         public const string BRIGHTNESS_LEVEL = "brightness_level";
         public const string RANGE_LEFT = "aim_range_left";
