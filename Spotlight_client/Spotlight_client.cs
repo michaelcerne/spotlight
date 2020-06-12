@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -164,16 +164,19 @@ namespace Spotlight_client
             {
                 if (Config.GetValueBool(Config.HELICOPTER_SUPPORT, true))
                 {
-                    if (!API.IsVehicleModel(handle, (uint)API.GetHashKey("polmav")) && Config.GetValueBool(Config.HELICOPTER_POLMAV_ONLY, false)) return false;
-                }
-                else return false;
+                    if (Config.GetValueBool(Config.HELICOPTER_POLMAV_ONLY, false))
+                    {
+                        if (API.IsVehicleModel(handle, (uint)API.GetHashKey("polmav"))) return true;
+                        return false;
+                    } else return true;
+                } else return false;
             }
 
             if (VehicleHasRotatableTargetBone(handle) && Config.GetValueBool(Config.TURRET_SUPPORT, true)) return true;
 
             if (isEmergency || !Config.GetValueBool(Config.EMERGENCY_ONLY, true)) return true;
 
-            return false;
+            return true;
         }
 
         private static void SetSpotlightDefaultsIfNull(int handle)
