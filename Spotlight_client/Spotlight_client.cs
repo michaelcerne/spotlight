@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -70,6 +70,8 @@ namespace Spotlight_client
 
         private async Task OnTick()
         {
+            int playerVehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), false);
+
             foreach (var vehicle in World.GetAllVehicles())
             {
                 var handle = vehicle.Handle;
@@ -80,6 +82,10 @@ namespace Spotlight_client
                     Vector3 directionalCoords = GetDirectionalCoordinates(handle, baseBone);
 
                     SetSpotlightDefaultsIfNull(handle);
+                    if (handle == playerVehicle)
+                    {
+                        DrawSpotlightLabel(true);
+                    }
 
                     API.DrawSpotLight(
                         baseCoords.X, baseCoords.Y, baseCoords.Z,
@@ -100,7 +106,6 @@ namespace Spotlight_client
         private async Task ToggleSpotlight()
         {
             var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), false);
-            var vehicleClass = API.GetVehicleClass(vehicle);
 
             if (IsSpotlightUsageAllowed(vehicle))
             {
@@ -108,6 +113,12 @@ namespace Spotlight_client
                 {
                     API.DecorSetBool(vehicle, DECOR_NAME_STATUS, false);
                     API.DecorSetFloat(vehicle, DECOR_NAME_BRIGHTNESS, 0f);
+                    for (int i = 0; i < 250; i++)
+                    {
+                        if (IsSpotlightEnabled(vehicle)) break;
+                        DrawSpotlightLabel(false);
+                        await Delay(0);
+                    }
                 } else
                 {
                     API.DecorSetBool(vehicle, DECOR_NAME_STATUS, true);
@@ -262,6 +273,28 @@ namespace Spotlight_client
                 API.DecorSetFloat(handle, decorName, from + (to - from) * i/10);
                 await Delay(timeMs);
             }
+        }
+
+        private static void DrawSpotlightLabel(bool status)
+        {
+            API.SetTextFont(0);
+            API.SetTextProportional(true);
+            API.SetTextScale(0.0f, 0.3f);
+            if (status)
+            {
+                API.SetTextColour(144, 238, 144, 255);
+            } else
+            {
+                API.SetTextColour(238, 144, 144, 255);
+            }
+            API.SetTextDropshadow(0, 0, 0, 0, 255);
+            API.SetTextEdge(1, 0, 0, 0, 255);
+            API.SetTextDropShadow();
+            API.SetTextOutline();
+            API.SetTextEntry("STRING");
+            API.AddTextComponentString("Spotlight: " + (status ? "ON" : "OFF"));
+            API.SetTextRightJustify(Config.GetValueBool(Config.MESSAGE_RIGHT_ALIGNED, false));
+            API.DrawText(0.005f, 0.480f);
         }
     }
 
