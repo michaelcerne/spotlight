@@ -64,7 +64,7 @@ namespace UpdateAnnouncer
         {
             Debug.Write("\n^1---\n-\n- ");
             Debug.Write(prerelease ? "^1This is a prerelease Spotlight build. Expect bugs." : "^1An update is available for Spotlight!\n- Get it at: https://github.com/michaelcerne/spotlight/releases\n- or: https://gtapolicemods.com/index.php?/files/file/1150-spotlight-enhanced-sync");
-            Debug.Write("^1\n-\n---\n");
+            Debug.Write("^1\n-\n---\n^9");
         }
     }
 }
