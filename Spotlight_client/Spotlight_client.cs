@@ -187,7 +187,7 @@ namespace Spotlight_client
 
             if (isEmergency || !Config.GetValueBool(Config.EMERGENCY_ONLY, true)) return true;
 
-            return true;
+            return false;
         }
 
         private static void SetSpotlightDefaultsIfNull(int handle)
