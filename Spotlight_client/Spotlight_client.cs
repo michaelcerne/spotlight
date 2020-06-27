@@ -81,6 +81,8 @@ namespace Spotlight_client
                     Vector3 baseCoords = GetBaseCoordinates(handle, baseBone);
                     Vector3 directionalCoords = GetDirectionalCoordinates(handle, baseBone);
 
+                    if (API.GetVehicleEngineHealth(handle) <= -4000) return;
+
                     SetSpotlightDefaultsIfNull(handle);
                     if (handle == playerVehicle)
                     {
