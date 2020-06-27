@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -299,6 +299,7 @@ namespace Spotlight_client
 
         private static void DrawSpotlightLabel(bool status)
         {
+            if (!Config.GetValueBool(Config.MESSAGE_ENABLED, true)) return;
             API.SetTextFont(0);
             API.SetTextProportional(true);
             API.SetTextScale(0.0f, 0.3f);

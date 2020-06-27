@@ -20,6 +20,7 @@ namespace Spotlight_client
         public const string BRIGHTNESS_LEVEL = "brightness_level";
         public const string RANGE_LEFT = "aim_range_left";
         public const string RANGE_RIGHT = "aim_range_right";
+        public const string MESSAGE_ENABLED = "show_message";
         public const string MESSAGE_RIGHT_ALIGNED = "message_on_right";
 
         public static string GetValueString(string key, string defaultValue)
