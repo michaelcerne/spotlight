@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -109,6 +109,12 @@ namespace Spotlight_client
 
             if (IsSpotlightUsageAllowed(vehicle))
             {
+                if (!API.NetworkHasControlOfEntity(vehicle))
+                {
+                    ShowControlFailureMessage();
+                    return;
+                }
+
                 if (IsSpotlightEnabled(vehicle))
                 {
                     API.DecorSetBool(vehicle, DECOR_NAME_STATUS, false);
@@ -134,6 +140,13 @@ namespace Spotlight_client
             var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), Config.GetValueBool(Config.REMOTE_CONTROL, true));
             var current = API.DecorGetFloat(vehicle, DECOR_NAME_Z);
 
+            if (!IsPlayerNearbyVehicle(API.GetPlayerPed(-1), vehicle)) return;
+            if (!API.NetworkHasControlOfEntity(vehicle))
+            {
+                ShowControlFailureMessage();
+                return;
+            }
+
             if (up)
             {
                 if (current <= 0.3f) await TranslateDecorSmoothly(vehicle, DECOR_NAME_Z, current, current + 0.1f, 10);
@@ -148,6 +161,13 @@ namespace Spotlight_client
             var vehicle = API.GetVehiclePedIsIn(API.GetPlayerPed(-1), Config.GetValueBool(Config.REMOTE_CONTROL, true));
             var current = API.DecorGetFloat(vehicle, DECOR_NAME_XY);
             bool isHeli = API.GetVehicleClass(vehicle) == 15;
+
+            if (!IsPlayerNearbyVehicle(API.GetPlayerPed(-1), vehicle)) return;
+            if (!API.NetworkHasControlOfEntity(vehicle))
+            {
+                ShowControlFailureMessage();
+                return;
+            }
 
             if (left)
             {
@@ -295,6 +315,26 @@ namespace Spotlight_client
             API.AddTextComponentString("Spotlight: " + (status ? "ON" : "OFF"));
             API.SetTextRightJustify(Config.GetValueBool(Config.MESSAGE_RIGHT_ALIGNED, false));
             API.DrawText(0.005f, 0.480f);
+        }
+
+        private static void ShowControlFailureMessage()
+        {
+            API.BeginTextCommandDisplayHelp("STRING");
+            API.AddTextComponentSubstringPlayerName("Only the owner of this vehicle can control the spotlight.");
+            API.EndTextCommandDisplayHelp(0, false, true, 3000);
+        }
+
+        private static bool IsPlayerNearbyVehicle(int ped, int vehicle)
+        {
+            Vector3 pedCoords = API.GetEntityCoords(ped, true);
+            Vector3 vehicleCoords = API.GetEntityCoords(vehicle, true);
+            float distance = API.GetDistanceBetweenCoords(pedCoords.X, pedCoords.Y, pedCoords.Z, vehicleCoords.X, vehicleCoords.Y, vehicleCoords.Z, true);
+
+            if (distance >= 3.0f)
+            {
+                return false;
+            }
+            return true;
         }
     }
 
